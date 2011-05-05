@@ -1,33 +1,32 @@
 (function (loaderSrc) {
-  var fakeWorker = function (fn, args) {
-    // todo
-    setInterval(function () {
-      fn.apply(null, args);
-    });
-  };
-  
+  var threadPool = [];
+
+window.threadPool = threadPool;
   window.Thread = {
     start: function (fn, args) {
       var
         worker,
+        result = null,
         events = {
           done: [],
-          message: []
-        };
+          fail: []
+        }, i;
       if (Worker) {
-        worker = new Worker(loaderSrc);
+        if (0 === threadPool.length) {
+          worker = new Worker(loaderSrc);
+        } else {
+          worker = threadPool.shift();
+        }
 
-        worker.addEventListener("message", function (ev) {
-          var i, args;
+        worker.onmessage = function (ev) {
+          var args;
 
           if ("done" === ev.data.type) {
+            result = ev.data.result;
             for (i = 0; i < events.done.length; i += 1) {
-              events.done[i](ev.data.result);
+              events.done[i](result);
             }
-          } else if ("message" === ev.data.type) {
-            for (i = 0; i < events.message.length; i += 1) {
-              events.message[i](ev.data.msg);
-            }
+            threadPool.push(worker);
           } else if ("log" === ev.data.type) {
             if (window.console && console.log) {
               args = ev.data.message;
@@ -55,64 +54,56 @@
                 case 5:
                   console.log(args[0], args[1], args[2], args[3], args[4]);
                   break;
-                case 6:
-                  console.log(args[0], args[1], args[2], args[3], args[4], args[5]);
-                  break;
-                case 7:
-                  console.log(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-                  break;
-                case 8:
-                  console.log(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-                  break;
-                case 9:
-                  console.log(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
-                  break;
                 default:
                   console.log(args);
                 }
               }
             }
-          } else if ("error" === ev.data.type) {
-            throw ev.data.error;
           }
-        }, false);
+        };
 
-        //setTimeout(function () {
-          worker.postMessage({ // this assumes complex data is allowed.  need a fallback / detection system
-            type: "source",
-            src: fn.toString(),
-            args: args
-          });
-        //});
+        worker.onerror = function (e) {
+          for (i = 0; i < events.fail.length; i += 1) {
+            events.fail[i](e);
+          }
+          worker.terminate();
+        };
+
+        worker.postMessage({ // this assumes complex data is allowed.  need a fallback / detection system
+          type: "source",
+          src: fn.toString(),
+          args: args
+        });
       } else {
-        fakeWorker(fn, args);
+        try {
+          result = fn.apply(null, args);
+          for (i = 0; i < events.done.length; i += 1) {
+            events.done[i](result);
+          }
+        } catch (e) {
+          for (i = 0; i < events.fail.length; i += 1) {
+            events.fail[i](e);
+          }
+          throw e;
+        }
       }
 
       return {
         done: function (fn) {
-          events.done.push(fn);
-          return this;
-        },
-        message: function (fn) {
-          events.message.push(fn);
-          return this;
-        },
-        tell: function (msg) {
-          if (worker) {
-            worker.postMessage({
-              type: "message",
-              data: msg
-            });
+          if (result) {
+            fn(result);
           } else {
-            // todo
+            events.done.push(fn);
           }
+          return this;
+        },
+        fail: function (fn) {
+          events.fail.push(fn);
           return this;
         },
         kill: function () {
           if (worker) {
             worker.terminate();
-          } else {
-            // todo
           }
         }
       }

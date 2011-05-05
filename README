@@ -1,0 +1,15 @@
+Fake Threading for Javascript, using Web Workers when available
+
+Usage:
+
+var myThread = Thread.start(function () {
+
+  // Something synchronous (blocking) and computationally intensive
+  // This is not intended for async behaviors
+
+  return "foo";
+}).done(function (result) {
+  // result === "foo"
+}).fail(function (error) {});
+
+myThread.kill();

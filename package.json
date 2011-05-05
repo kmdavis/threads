@@ -1,0 +1,11 @@
+{
+  "name"          : "threads",
+  "description"   : "A library to fake thread behavior in js",
+  "url"           : "http://www.github.com/kmdavis/threads",
+  "keywords"      : ["util", "functional", "client", "browser", "threading", "language"],
+  "author"        : "Kevan Davis <kdavis@gilt.com>",
+  "contributors"  : [],
+  "lib"           : ".",
+  "main"          : "threads.js",
+  "version"       : "0.0.1"
+}

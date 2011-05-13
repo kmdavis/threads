@@ -1,6 +1,6 @@
-(function (loaderSrc) {
+(function () {
   var bb = new (window.BlobBuilder || window.WebKitBlobBuilder)(),
-    threadPool = [];
+    threadPool = [],
     loaderSrc = "";
 
   bb.append("(" +
@@ -29,7 +29,6 @@
     loaderSrc = webkitURL.createObjectURL(bb.getBlob());
   }
 
-  window.threadPool = threadPool;
   window.Thread = {
     start: function (fn, args) {
       var
@@ -40,63 +39,63 @@
           fail: []
         }, i;
 
-      if (Worker) {
+      if (Worker || "" === loaderSrc) {
         if (0 === threadPool.length) {
           worker = new Worker(loaderSrc);
-        } else {
-          worker = threadPool.shift();
-        }
 
-        worker.onmessage = function (ev) {
-          var args;
+          worker.onmessage = function (ev) {
+            var args;
 
-          if ("done" === ev.data.type) {
-            result = ev.data.result;
-            for (i = 0; i < events.done.length; i += 1) {
-              events.done[i](result);
-            }
-            threadPool.push(worker);
-          } else if ("log" === ev.data.type) {
-            if (window.console && console.log) {
-              args = ev.data.message;
-              try {
+            if ("done" === ev.data.type) {
+              result = ev.data.result;
+              for (i = 0; i < events.done.length; i += 1) {
+                events.done[i](result);
+              }
+              threadPool.push(worker);
+            } else if ("log" === ev.data.type) {
+              if (window.console && console.log) {
+                args = ev.data.message;
+                try {
 
-                // Firefox and Opera support using apply on native functions
-                console.log.apply(this, args);
+                  // Firefox and Opera support using apply on native functions
+                  console.log.apply(this, args);
 
-              } catch (e) {
+                } catch (e) {
 
-                // IE and Webkit do not allow using apply on native functions, so, we have to do this the hard and ugly way
-                switch (args.length) {
-                case 1:
-                  console.log(args[0]);
-                  break;
-                case 2:
-                  console.log(args[0], args[1]);
-                  break;
-                case 3:
-                  console.log(args[0], args[1], args[2]);
-                  break;
-                case 4:
-                  console.log(args[0], args[1], args[2], args[3]);
-                  break;
-                case 5:
-                  console.log(args[0], args[1], args[2], args[3], args[4]);
-                  break;
-                default:
-                  console.log(args);
+                  // IE and Webkit do not allow using apply on native functions, so, we have to do this the hard and ugly way
+                  switch (args.length) {
+                  case 1:
+                    console.log(args[0]);
+                    break;
+                  case 2:
+                    console.log(args[0], args[1]);
+                    break;
+                  case 3:
+                    console.log(args[0], args[1], args[2]);
+                    break;
+                  case 4:
+                    console.log(args[0], args[1], args[2], args[3]);
+                    break;
+                  case 5:
+                    console.log(args[0], args[1], args[2], args[3], args[4]);
+                    break;
+                  default:
+                    console.log(args);
+                  }
                 }
               }
             }
-          }
-        };
+          };
 
-        worker.onerror = function (e) {
-          for (i = 0; i < events.fail.length; i += 1) {
-            events.fail[i](e);
-          }
-          worker.terminate();
-        };
+          worker.onerror = function (e) {
+            for (i = 0; i < events.fail.length; i += 1) {
+              events.fail[i](e);
+            }
+            worker.terminate();
+          };
+        } else {
+          worker = threadPool.shift();
+        }
 
         worker.postMessage({ // this assumes complex data is allowed.  need a fallback / detection system
           type: "source",

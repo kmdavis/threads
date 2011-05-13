@@ -1,19 +1,17 @@
+console = {
+  log: function () {
+    postMessage({
+      type: "log",
+      message: [].slice.apply(arguments)
+    });
+  }
+};
+
 onmessage = function (ev) {
   if ("source" === ev.data.type) {
-    var
-      fn = eval("(" + ev.data.src + ")");
-      console = {
-        log: function () {
-          postMessage({
-            type: "log",
-            message: [].slice.apply(arguments)
-          });
-        }
-      };
-
     postMessage({
       type: "done",
-      result: fn.apply(null, ev.data.args)
+      result: eval("(" + ev.data.src + ")").apply(null, ev.data.args)
     });
   }
 };

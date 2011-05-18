@@ -1,6 +1,6 @@
-(function () {
+(function threadWrapper () {
   if (window.Worker && (window.BlobBuilder || window.WebKitBlobBuilder) && (window.createBlobURL || window.webkitURL)) {
-    var bb, threadPool, loaderSrc;
+    var bb, threadPool = [], loaderSrc;
 
     if (window.BlobBuilder) {
       bb = new BlobBuilder();
@@ -11,16 +11,16 @@
     }
 
     bb.append("(" +
-      (function () {
+      (function threadLoader () {
         console = {
-          log: function () {
+          log: function log () {
             postMessage({
               type: "log",
               message: [].slice.apply(arguments)
             });
           }
         };
-        onmessage = function (ev) {
+        onmessage = function onMessage (ev) {
           if ("source" === ev.data.type) {
             postMessage({
               type: "done",
@@ -39,7 +39,7 @@
     }
 
     // Semi Fake Threading:  Execute in Worker
-    window.Thread = function (fn, args) {
+    window.Thread = function Thread (fn, args) {
       var
         worker = null,
         result = null,
@@ -52,7 +52,7 @@
       if (0 === threadPool.length) {
         worker = new Worker(loaderSrc);
 
-        worker.onmessage = function (ev) {
+        worker.onmessage = function onmessage (ev) {
           var args;
 
           if ("done" === ev.data.type) {
@@ -96,7 +96,7 @@
           }
         };
 
-        worker.onerror = function (e) {
+        worker.onerror = function onerror (e) {
           failure = e;
           for (i = 0; i < events.fail.length; i += 1) {
             events.fail[i](e);
@@ -107,7 +107,7 @@
         worker = threadPool.shift();
       }
 
-      this.done = function (fn) {
+      this.done = function done (fn) {
         if (result) {
           fn(result);
         } else {
@@ -116,7 +116,7 @@
 
         return this;
       };
-      this.fail = function (fn) {
+      this.fail = function fail (fn) {
         if (failure) {
           fn(failure);
         } else {
@@ -125,7 +125,7 @@
 
         return this;
       };
-      this.kill = function () {
+      this.kill = function kill () {
         worker.terminate();
       };
 
@@ -140,7 +140,7 @@
   } else {
 
     // Really Fake Threading:  Execute in UI Thread
-    window.Thread = function (fn, args) {
+    window.Thread = function Thread (fn, args) {
       var
         result = null,
         failure = null,
@@ -162,7 +162,7 @@
         throw e;
       }
 
-      this.done = function (fn) {
+      this.done = function done (fn) {
         if (result) {
           fn(result);
         } else {
@@ -171,7 +171,7 @@
 
         return this;
       };
-      this.fail = function (fn) {
+      this.fail = function fail (fn) {
         if (failure) {
           fn(failure);
         } else {
@@ -180,13 +180,13 @@
 
         return this;
       };
-      this.kill = function () {};
+      this.kill = function kill () {};
     };
 
     Thread.usesWorkers = false;
   }
 
-  window.Thread.start = function (fn, args) {
+  window.Thread.start = function start (fn, args) {
     return new Thread(fn, args);
   };
 }());

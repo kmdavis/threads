@@ -2,26 +2,40 @@
   <body>
     <script type="text/javascript" src="threads.js"></script>
     <script type="text/javascript">
-      /*var w = Thread.start(function (a, b, c) {
-        console.log("HI");
+      (function () {
+        window.isUIThread = true;
+        var isUIThreadFunctionScope = true;
 
-        var count = 1000;
+        (function () {
+          console.log("This is an anonymous self executing function");
+          console.log("Is this the UI Thread? %o", isUIThread);
+          console.log("Can we see parent function scope?", isUIThreadFunctionScope);
+        }());
 
-        setInterval(function () {
-          count -= 1;
-          if (count > 0) {
-            console.log("HI FROM THREAD");
+        new Thread(function () {
+          console.log("This is an anonymous function in a Thread");
+          console.log("Is this the UI Thread? %o", (function () { try { return isUIThread; } catch (e) { return false; } }()));
+          console.log("Can we see parent function scope?", (function () { try { return isUIThreadFunctionScope; } catch (e) { return false; } }()));
+        });
+
+        var watcher = setInterval(function () {
+          console.log("Waiting...");
+        }, 1000);
+
+        Thread.start(function (max) {
+          console.log("Worker Thread is doing something that might take awhile");
+          var result = Math.random() * 1000;
+          for (var i = 0; i < max; i += 1) {
+            result = Math.pow(result % (1024 * 1024) + 1, 2);
           }
-        }, 500);
+          return result;
+        }, [100000000]).done(function (result) {
+          clearInterval(watcher);
+          console.log("Result from Thread: %o", result);
+        });
 
-        return "FOO " + (a + b + c);
-      }, [1,2,3]).done(function (msg) {
-        console.log(msg)
-      });
-
-      setInterval(function () {
-        console.log("HI FROM MAIN THREAD");
-      }, 1000);*/
+        console.log("Waiting on Worker Thread");
+      }());
     </script>
   </body>
 </html>

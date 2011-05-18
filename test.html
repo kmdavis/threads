@@ -1,8 +1,42 @@
 <html>
+  <head>
+    <style type="text/css">
+      .ball {
+        background-color: blue;
+        border-radius: 50px;
+        height: 100px;
+        left: 50%;
+        margin:  -50px 0 0 -50px;
+        position: absolute;
+        top: 50%;
+        width: 100px;
+        -webkit-transition: all 1s ease-in-out;
+      }
+
+      .ball:hover {
+        border-radius: 60px;
+        height: 120px;
+        width: 120px;
+        margin: -60px 0 0 -60px;
+      }
+    </style>
+  </head>
   <body>
+    <div class="ball"></div>
     <script type="text/javascript" src="threads.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
     <script type="text/javascript">
-      (function () {
+      $(function () {
+        var animateBall = function () {
+          $(".ball").animate({
+            left: Math.floor(Math.random() * 80 + 10) + "%",
+            top: Math.floor(Math.random() * 80 + 10) + "%"
+          }, 1000, animateBall);
+        }
+        animateBall();
+      });
+
+      $(function () {
         window.isUIThread = true;
         var isUIThreadFunctionScope = true;
 
@@ -35,7 +69,7 @@
         });
 
         console.log("Waiting on Worker Thread");
-      }());
+      });
     </script>
   </body>
 </html>

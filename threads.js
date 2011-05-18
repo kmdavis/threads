@@ -51,61 +51,61 @@
 
       if (0 === threadPool.length) {
         worker = new Worker(loaderSrc);
-
-        worker.onmessage = function onmessage (ev) {
-          var args;
-
-          if ("done" === ev.data.type) {
-            result = ev.data.result;
-            for (i = 0; i < events.done.length; i += 1) {
-              events.done[i](result);
-            }
-            threadPool.push(worker);
-          } else if ("log" === ev.data.type) {
-            if (window.console && console.log) {
-              args = ev.data.message;
-              try {
-
-                // Firefox and Opera support using apply on native functions
-                console.log.apply(this, args);
-
-              } catch (e) {
-
-                // IE and Webkit do not allow using apply on native functions, so, we have to do this the hard and ugly way
-                switch (args.length) {
-                case 1:
-                  console.log(args[0]);
-                  break;
-                case 2:
-                  console.log(args[0], args[1]);
-                  break;
-                case 3:
-                  console.log(args[0], args[1], args[2]);
-                  break;
-                case 4:
-                  console.log(args[0], args[1], args[2], args[3]);
-                  break;
-                case 5:
-                  console.log(args[0], args[1], args[2], args[3], args[4]);
-                  break;
-                default:
-                  console.log(args);
-                }
-              }
-            }
-          }
-        };
-
-        worker.onerror = function onerror (e) {
-          failure = e;
-          for (i = 0; i < events.fail.length; i += 1) {
-            events.fail[i](e);
-          }
-          worker.terminate();
-        };
       } else {
         worker = threadPool.shift();
       }
+      
+      worker.onmessage = function onmessage (ev) {
+        var args;
+
+        if ("done" === ev.data.type) {
+          result = ev.data.result;
+          for (i = 0; i < events.done.length; i += 1) {
+            events.done[i](result);
+          }
+          threadPool.push(worker);
+        } else if ("log" === ev.data.type) {
+          if (window.console && console.log) {
+            args = ev.data.message;
+            try {
+
+              // Firefox and Opera support using apply on native functions
+              console.log.apply(this, args);
+
+            } catch (e) {
+
+              // IE and Webkit do not allow using apply on native functions, so, we have to do this the hard and ugly way
+              switch (args.length) {
+              case 1:
+                console.log(args[0]);
+                break;
+              case 2:
+                console.log(args[0], args[1]);
+                break;
+              case 3:
+                console.log(args[0], args[1], args[2]);
+                break;
+              case 4:
+                console.log(args[0], args[1], args[2], args[3]);
+                break;
+              case 5:
+                console.log(args[0], args[1], args[2], args[3], args[4]);
+                break;
+              default:
+                console.log(args);
+              }
+            }
+          }
+        }
+      };
+
+      worker.onerror = function onerror (e) {
+        failure = e;
+        for (i = 0; i < events.fail.length; i += 1) {
+          events.fail[i](e);
+        }
+        worker.terminate();
+      };
 
       this.done = function done (fn) {
         if (result) {

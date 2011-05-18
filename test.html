@@ -69,6 +69,15 @@
         });
 
         console.log("Waiting on Worker Thread");
+
+        Thread.start(function () {
+          console.log("Foo Bar Thread started");
+          listen(function (a) {
+            tell(a + " bar");
+          });
+        }).listen(function (a) {
+          console.log("Thread said %s", a);
+        }).tell("foo");
       });
     </script>
   </body>

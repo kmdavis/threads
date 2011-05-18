@@ -20,12 +20,38 @@
             });
           }
         };
+
+        var listeners = {};
+
         onmessage = function onMessage (ev) {
+          var i, listening, listen, tell;
+
           if ("source" === ev.data.type) {
+            listening = listeners[ev.data.id] = [],
+            listen = function (fn) {
+              listening.push(fn);
+            };
+
+            tell = function () {
+              postMessage({
+                type: "tell",
+                id: ev.data.id,
+                args: [].slice.apply(arguments)
+              });
+            };
+
             postMessage({
               type: "done",
+              id: ev.data.id,
               result: eval("(" + ev.data.src + ")").apply(null, ev.data.args)
             });
+
+          } else if ("tell" === ev.data.type) {
+
+            listening = listeners[ev.data.id];
+            for (i = 0; i < listening.length; i += 1) {
+              listening[i].apply(null, ev.data.args);
+            }
           }
         };
       }).toString() + "())");
@@ -46,7 +72,8 @@
         failure = null,
         events = {
           done: [],
-          fail: []
+          fail: [],
+          listen: []
         }, i;
 
       if (0 === threadPool.length) {
@@ -96,6 +123,10 @@
               }
             }
           }
+        } else if ("tell" === ev.data.type) {
+          for (i = 0; i < events.listen.length; i += 1) {
+            events.listen[i].apply(null, ev.data.args);
+          }
         }
       };
 
@@ -116,6 +147,22 @@
 
         return this;
       };
+
+      this.listen = function listen (fn) {
+        events.listen.push(fn);
+        return this;
+      };
+
+      this.tell = function tell () {
+        worker.postMessage({
+          type: "tell",
+          id: "only", // todo
+          args: [].slice.apply(arguments)
+        });
+
+        return this;
+      };
+
       this.fail = function fail (fn) {
         if (failure) {
           fn(failure);
@@ -131,6 +178,7 @@
 
       worker.postMessage({ // this assumes complex data is allowed.  need a fallback / detection system
         type: "source",
+        id: "only", // todo
         src: fn.toString(),
         args: args
       });
@@ -146,11 +194,27 @@
         failure = null,
         events = {
           done: [],
-          fail: []
-        }, i;
+          fail: [],
+          listen: []
+        }, i,
+        tell,
+        listen,
+        listening = [];
 
       try {
-        result = fn.apply(null, args);
+        tell = function () {
+          var args = [].slice.apply(arguments);
+          for (i = 0; i < events.listen.length; i += 1) {
+            events.listen[i].apply(null, args);
+          }
+        };
+
+        listen = function (fn) {
+          listening.push(fn);
+        };
+
+        result = eval("(" + fn.toString() + ")").apply(null, args);
+
         for (i = 0; i < events.done.length; i += 1) {
           events.done[i](result);
         }
@@ -171,6 +235,21 @@
 
         return this;
       };
+
+      this.listen = function listen (fn) {
+        events.listen.push(fn);
+        return this;
+      };
+
+      this.tell = function tell () {
+        var args = [].slice.apply(arguments);
+        for (i = 0; i < listening.length; i += 1) {
+          listening[i].apply(null, args);
+        }
+
+        return this;
+      };
+
       this.fail = function fail (fn) {
         if (failure) {
           fn(failure);
@@ -180,6 +259,7 @@
 
         return this;
       };
+
       this.kill = function kill () {};
     };
 

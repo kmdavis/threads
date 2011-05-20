@@ -41,7 +41,7 @@
           };
 
           if ("source" === ev.data.type) {
-            listening = listeners[ev.data.id] = [],
+            listening = listeners[ev.data.id] = [];
 
             postMessage({
               type: "done",

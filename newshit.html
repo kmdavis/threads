@@ -3,6 +3,7 @@
     <style type="text/css">
       .ball {
         background-color: blue;
+        border: 1px solid lightblue;
         border-radius: 50px;
         height: 100px;
         left: 50%;
@@ -37,25 +38,13 @@
       });
 
       $(function () {
-        window.isUIThread = true;
-        var isUIThreadFunctionScope = true;
-
-        (function () {
-          console.log("This is an anonymous self executing function");
-          console.log("Is this the UI Thread? %o", isUIThread);
-          console.log("Can we see parent function scope?", isUIThreadFunctionScope);
-        }());
-
-        new Thread(function () {
-          console.log("This is an anonymous function in a Thread");
-          console.log("Is this the UI Thread? %o", (function () { try { return isUIThread; } catch (e) { return false; } }()));
-          console.log("Can we see parent function scope?", (function () { try { return isUIThreadFunctionScope; } catch (e) { return false; } }()));
-        });
 
         var watcher = setInterval(function () {
           console.log("Waiting...");
         }, 1000);
 
+        // This takes significantly longer (~2.5x) to execute.  not sure why.  I benchmarked several things, and always got 0ms
+        // Might be in the blob url stuff
         Thread.start(function (max) {
           console.log("Worker Thread is doing something that might take awhile");
           var result = Math.random() * 1000;
@@ -70,14 +59,6 @@
 
         console.log("Waiting on Worker Thread");
 
-        Thread.start(function () {
-          console.log("Foo Bar Thread started");
-          this.listen(function (a) {
-            this.tell(a + " bar");
-          });
-        }).listen(function (a) {
-          console.log("Thread said %s", a);
-        }).tell("foo");
       });
     </script>
   </body>

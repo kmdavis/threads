@@ -1,0 +1,52 @@
+<html>
+  <head>
+    <style type="text/css">
+      .ball {
+        background-color: blue;
+        border-radius: 50px;
+        height: 100px;
+        left: 50%;
+        margin:  -50px 0 0 -50px;
+        position: absolute;
+        top: 50%;
+        width: 100px;
+        -webkit-transition: all 1s ease-in-out;
+      }
+
+      .ball:hover {
+        border-radius: 100px;
+        height: 200px;
+        width: 200px;
+        margin: -100px 0 0 -100px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ball"></div>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+    <script type="text/javascript">
+      $(function () {
+        var animateBall = function () {
+          $(".ball").animate({
+            left: Math.floor(Math.random() * 80 + 10) + "%",
+            top: Math.floor(Math.random() * 80 + 10) + "%"
+          }, 1000, animateBall);
+        };
+        animateBall();
+      });
+
+      $(function () {
+
+        console.log(function (max) {
+          console.log("Doing something that might take awhile");
+          var result = Math.random() * 1000;
+          for (var i = 0; i < max; i += 1) {
+            result = Math.pow(result % (1024 * 1024) + 1, 2);
+          }
+          return result;
+        }(100000000));
+
+      });
+    </script>
+  </body>
+</html>

@@ -1,5 +1,5 @@
 (function threadWrapper () {
-  if (window.Worker && (window.BlobBuilder || window.WebKitBlobBuilder) && (window.createBlobURL || window.webkitURL)) {
+  if (window.Worker && (window.BlobBuilder || window.WebKitBlobBuilder) && (window.createBlobURL || window.URL || window.webkitURL)) {
     var bb, threadPool = [], loaderSrc;
 
     if (window.BlobBuilder) {
@@ -24,41 +24,44 @@
         var listeners = {};
 
         onmessage = function onMessage (ev) {
-          var i, listening, listen, tell;
-
-          if ("source" === ev.data.type) {
-            listening = listeners[ev.data.id] = [],
-            listen = function (fn) {
+          var i, listening, context = {
+            listen: function (fn) {
               listening.push(fn);
-            };
+            },
 
-            tell = function () {
+            tell: function () {
               postMessage({
                 type: "tell",
                 id: ev.data.id,
                 args: [].slice.apply(arguments)
               });
-            };
+            }
+          };
+
+          if ("source" === ev.data.type) {
+            listening = listeners[ev.data.id] = [],
 
             postMessage({
               type: "done",
               id: ev.data.id,
-              result: eval("(" + ev.data.src + ")").apply(null, ev.data.args)
+              result: eval("(" + ev.data.src + ")").apply(context, ev.data.args)
             });
 
           } else if ("tell" === ev.data.type) {
 
             listening = listeners[ev.data.id];
             for (i = 0; i < listening.length; i += 1) {
-              listening[i].apply(null, ev.data.args);
+              listening[i].apply(context, ev.data.args);
             }
           }
         };
       }).toString() + "())");
 
-    if (window.createBlobURL) {
+    if (window.createBlobURL) { // W3C
       loaderSrc = createBlobURL(bb.getBlob());
-    } else if (window.webkitURL) {
+    } else if (window.URL) { // Firefox
+      loaderSrc = URL.createObjectURL(bb.getBlob());
+    } else if (window.webkitURL) { // Chrome
       loaderSrc = webkitURL.createObjectURL(bb.getBlob());
     } else {
       throw new Error("No means to create a Blob URL");
@@ -196,24 +199,24 @@
           done: [],
           fail: [],
           listen: []
-        }, i,
-        tell,
-        listen,
+        },
+        i,
+        context = {
+          tell: function () {
+            var args = [].slice.apply(arguments);
+            for (i = 0; i < events.listen.length; i += 1) {
+              events.listen[i].apply(null, args);
+            }
+          },
+
+          listen: function (fn) {
+            listening.push(fn);
+          }
+        },
         listening = [];
 
       try {
-        tell = function () {
-          var args = [].slice.apply(arguments);
-          for (i = 0; i < events.listen.length; i += 1) {
-            events.listen[i].apply(null, args);
-          }
-        };
-
-        listen = function (fn) {
-          listening.push(fn);
-        };
-
-        result = eval("(" + fn.toString() + ")").apply(null, args);
+        result = fn.apply(context, args);
 
         for (i = 0; i < events.done.length; i += 1) {
           events.done[i](result);
@@ -244,7 +247,7 @@
       this.tell = function tell () {
         var args = [].slice.apply(arguments);
         for (i = 0; i < listening.length; i += 1) {
-          listening[i].apply(null, args);
+          listening[i].apply(context, args);
         }
 
         return this;

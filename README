@@ -1,15 +1,58 @@
-Fake Threading for Javascript, using Web Workers when available
+        ,----,
+      ,/   .`|
+    ,`   .'  :  ,---,
+  ;    ;     /,--.' |                                       ,---,
+.'___,/    ,' |  |  :      __  ,-.                        ,---.'|          .--.
+|    :     |  :  :  :    ,' ,'/ /|                        |   | :        .--,`|  .--.--.
+;    |.';  ;  :  |  |,--.'  | |' | ,---.     ,--.--.      |   | |        |  |.  /  /    '
+`----'  |  |  |  :  '   ||  |   ,'/     \   /       \   ,--.__| |        '--`_ |  :  /`./
+    '   :  ;  |  |   /' :'  :  / /    /  | .--.  .-. | /   ,'   |        ,--,'||  :  ;_
+    |   |  '  '  :  | | ||  | ' .    ' / |  \__\/: . ..   '  /  |        |  | ' \  \    `.
+    '   :  |  |  |  ' | :;  : | '   ;   /|  ," .--.; |'   ; |:  |        :  | |  `----.   \
+    ;   |.'   |  :  :_:,'|  , ; '   |  / | /  /  ,.  ||   | '/  '___   __|  : ' /  /`--'  /
+    '---'     |  | ,'     ---'  |   :    |;  :   .'   \   :    :/  .\.'__/\_: |'--'.     /
+              `--''              \   \  / |  ,     .-./\   \  / \  ; |   :    :  `--'---'
+                                  `----'   `--`---'     `----'   `--" \   \  /
+                                                                       `--`-'
+===========================================================================================
+
+Thread.js makes it easy to move your number crunching code into a separate thread.
+It does so by using web workers, without requiring a separate file for your worker.
+
+How does it do so?  Blob URLs.  As such, (currently) only Chrome 12+ is fully supported.
+
+===========================================================================================
 
 Usage:
 
 var myThread = Thread.start(function () {
+  console.log("Console.log is actually available!");
 
-  // Something synchronous (blocking) and computationally intensive
-  // This is not intended for async behaviors
+  this.listen(function (msg) {
+    this.tell("Hello " + msg);
+  });
 
   return "foo";
 }).done(function (result) {
   // result === "foo"
-}).fail(function (error) {});
+}).listen(function (msg) {
+  // msg === "Hello World";
+}).tell("World");
 
-myThread.kill();
+===========================================================================================
+
+API:
+
+  new Thread(fn)
+
+  Thread.start // alias for new Thread
+
+  myThread.done
+
+  myThread.fail
+  
+  myThread.listen
+
+  myThread.tell
+
+  myThread.send

@@ -1,0 +1,8 @@
+.DS_Store
+node_modules
+*.log
+dist
+.npmrc
+*.un~
+[.]*.sw[mnop]
+docs

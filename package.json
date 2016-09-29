@@ -1,7 +1,7 @@
 {
-    "name": "threads",
+    "name": "threadsjs",
     "version": "0.2.0",
-    "description": "A library to fake thread behavior in js",
+    "description": "A library to create thread behavior in js",
     "author": "Kevan Davis <kevan.davis@me.com>",
     "keywords": [
         "threads"

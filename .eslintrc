@@ -4,6 +4,7 @@
     "rules": {
         "indent": ["error", 4],
         "max-len": [1, 100, 4, { "ignoreUrls": true }],
+        "no-underscore-dangle": [0],
         "no-unused-vars": [2, {
             "vars": "local",
             "args": "after-used",

@@ -77,6 +77,13 @@ class Thread {
         return this;
     }
 
+    toPromise () {
+        return new Promise((resolve, reject) => {
+            this.on("done", resolve);
+            this.on("error", reject);
+        });
+    }
+
     kill () {} // noop
 
     static start (fn, ...args) {

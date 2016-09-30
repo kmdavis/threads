@@ -56,6 +56,18 @@ describe("Fallback Threads", () => {
         });
     });
 
+    describe("#toPromise", () => {
+        it("should return a Promise that resolves if the thread emits 'done'", () =>
+            new Thread(() => "foo").toPromise()
+                .should.eventually.equal("foo")
+        );
+
+        it("should return a Promise that rejects if the thread emits 'error'", () =>
+            new Thread(() => { throw new Error(); }).toPromise()
+                .should.eventually.be.rejected
+        );
+    });
+
     describe(".start", () => {
         it("should create a new Thread", done => {
             Thread.start(() => "this is a simple test").on("done", result => {

@@ -133,6 +133,21 @@ class Thread {
     }
 
     /**
+     * Create a promise that will resolve if "done" is emitted, and reject if "error" is emitted.
+     *
+     * @return {Promise}
+     *
+     * @example
+     * myThread.toPromise().then(result => { ... });
+     */
+    toPromise () {
+        return new Promise((resolve, reject) => {
+            this.on("done", resolve);
+            this.on("error", reject);
+        });
+    }
+
+    /**
      * Kill a thread by killing it's worker.
      */
     kill () {

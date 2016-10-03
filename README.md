@@ -32,7 +32,7 @@ Works in both the browser and in node.
 
 ## Usage:
 
-```
+```js
 import Thread from "threads";
 
 const myThread = new Thread(function (m) {
@@ -52,7 +52,7 @@ Without using threads (workers under the hood) this would block the UI thread fo
 If the thread fn doesn't return anything, the thread will just keep running, and can listen to and emit events with it's parent.
 e.g.
 
-```
+```js
 import Thread from "threads";
 
 const myThread = new Thread(function () {
@@ -71,7 +71,7 @@ setTimeout(() => myThread.emit("tock"), 30 * 1000);
 
 And if the thread fn returns a Promise, it'll wait on that promise before emitting "done"
 
-```
+```js
 import Thread from "threads";
 
 const myThread = new Thread(function () {

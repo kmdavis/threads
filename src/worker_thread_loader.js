@@ -13,7 +13,11 @@ function threadLoader () {
      */
     function Context (id) {
         this.__id__ = id;
-        this.__emitter__ = new self.EventEmitter();
+        try {
+            this.__emitter__ = new self.EventEmitter();
+        } catch (e) {
+            this.__emitter__ = new global.EventEmitter();
+        }
     }
 
     /**
@@ -153,7 +157,7 @@ function threadLoader () {
 }
 
 const loaderSrc = `
-${EventEmitter};
+this.EventEmitter = ${EventEmitter};
 (${threadLoader})();
 `;
 const loaderFunction = `(function () {
@@ -162,7 +166,7 @@ const loaderFunction = `(function () {
 
 /* eslint-disable no-new-func */
 // http://stackoverflow.com/a/31090240
-const IS_NODE = !(new Function("try { return this === window; } catch (e) { return false; }"));
+const IS_NODE = !(new Function("try { return this === window; } catch (e) { return false; }")());
 /* eslint-enable no-new-func */
 
 let workerThreadLoader;

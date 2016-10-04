@@ -9,7 +9,7 @@ const IS_NODE = !(new Function("try { return this === window; } catch (e) { retu
 let Thread;
 
 if (IS_NODE) {
-    global.Worker = global.require("tiny-worker");
+    // global.Worker = global.require("tiny-worker");
     Thread = WorkerThread;
 } else {
     const BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder;

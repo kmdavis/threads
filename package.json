@@ -14,8 +14,9 @@
         "url": "https://github.com/kmdavis/threads/issues"
     },
     "scripts": {
+        "clean": "rm -rf dist && rm -rf lib",
+        "build": "babel src --presets=es2015 --out-dir=lib && mkdir -p dist && babel src --presets=es2015 --plugins=transform-es2015-modules-umd -o dist/index.js && uglifyjs -c -o dist/index.min.js -- dist/index.js",
         "doc": "rm -rf docs && jsdoc -r src/index.js -d docs -R README.md -c jsdoc.json",
-        "build": "babel src --presets=es2015 --plugins=transform-es2015-modules-umd -o index.js && uglifyjs -c -o index.min.js -- index.js",
         "test": "karma start"
     },
     "main": "main.js",
@@ -27,7 +28,6 @@
         "babel-eslint": "6.1.x",
         "babel-plugin-transform-es2015-modules-umd": "6.8.x",
         "babel-preset-es2015": "6.9.x",
-        "babel-register": "6.11.x",
         "babelify": "7.2.x",
         "browserify": "13.1.x",
         "chai-as-promised": "5.3.x",

@@ -15,7 +15,7 @@
     },
     "scripts": {
         "clean": "rm -rf dist && rm -rf lib",
-        "build": "babel src --presets=es2015 --out-dir=lib && mkdir -p dist && babel src --presets=es2015 --plugins=transform-es2015-modules-umd -o dist/index.js && uglifyjs -c -o dist/index.min.js -- dist/index.js",
+        "build": "babel src --presets=es2015 --out-dir=lib && mkdir -p dist && browserify lib/index.js --outfile dist/index.js --standalone Thread && uglifyjs -c -o dist/index.min.js -- dist/index.js",
         "doc": "rm -rf docs && jsdoc -r src/index.js -d docs -R README.md -c jsdoc.json",
         "test": "karma start"
     },
@@ -26,7 +26,6 @@
     "devDependencies": {
         "babel-cli": "6.9.x",
         "babel-eslint": "6.1.x",
-        "babel-plugin-transform-es2015-modules-umd": "6.8.x",
         "babel-preset-es2015": "6.9.x",
         "babelify": "7.2.x",
         "browserify": "13.1.x",

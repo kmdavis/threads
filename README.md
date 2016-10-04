@@ -28,6 +28,14 @@ Works in both the browser and in node.
 
 `npm install threadsjs`
 
+### Node
+
+In node, you can just `require("threadsjs");`
+
+### Browser
+
+In the browser, you need to include `./dist/index.min.js` in your frontend build. Having done so, you can then require Threads via AMD's require or via a global variable named `Thread`.
+
 ===========================================================================================
 
 ## Usage:

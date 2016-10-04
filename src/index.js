@@ -1,28 +1,17 @@
 import FallbackThread from "./fallback_thread";
 import WorkerThread from "./worker_thread";
 
-/* eslint-disable no-new-func */
-// http://stackoverflow.com/a/31090240
-const IS_NODE = !(new Function("try { return this === window; } catch (e) { return false; }"));
-/* eslint-enable no-new-func */
+const BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder;
+const createObjectURL = (window.URL && window.URL.createObjectURL) ||
+    (window.webkitURL && window.webkitURL.createObjectURL);
+const Blob = window.Blob;
+const BLOB_CONSTRUCTOR = (Blob || false) && (new Blob(["test"]).size === 4);
 
 let Thread;
-
-if (IS_NODE) {
-    // global.Worker = global.require("tiny-worker");
+if (Blob && createObjectURL && (BLOB_CONSTRUCTOR || BlobBuilder)) {
     Thread = WorkerThread;
 } else {
-    const BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder;
-    const createObjectURL = (window.URL && window.URL.createObjectURL) ||
-        (window.webkitURL && window.webkitURL.createObjectURL);
-    const Blob = window.Blob;
-    const BLOB_CONSTRUCTOR = (Blob || false) && (new Blob(["test"]).size === 4);
-
-    if (Blob && createObjectURL && (BLOB_CONSTRUCTOR || BlobBuilder)) {
-        Thread = WorkerThread;
-    } else {
-        Thread = FallbackThread;
-    }
+    Thread = FallbackThread;
 }
 
 export default Thread;

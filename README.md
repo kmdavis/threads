@@ -41,7 +41,7 @@ In the browser, you need to include `./dist/index.min.js` in your frontend build
 ## Usage:
 
 ```js
-import Thread from "threads";
+import Thread from "threadsjs";
 
 const myThread = new Thread(function (m) {
     function slowFibonacci (n) {
@@ -61,7 +61,7 @@ If the thread fn doesn't return anything, the thread will just keep running, and
 e.g.
 
 ```js
-import Thread from "threads";
+import Thread from "threadsjs";
 
 const myThread = new Thread(function () {
     let seq = 0;
@@ -80,7 +80,7 @@ setTimeout(() => myThread.emit("tock"), 30 * 1000);
 And if the thread fn returns a Promise, it'll wait on that promise before emitting "done"
 
 ```js
-import Thread from "threads";
+import Thread from "threadsjs";
 
 const myThread = new Thread(function () {
     return new Promise(resolve => {
